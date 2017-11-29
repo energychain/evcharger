@@ -4,3 +4,6 @@ Cost clearing and balancing in energy blockchain for KEBA based electric vehicle
 ## Installation
 `npm install -g evcharger`
 
+## Usage
+`stromdao.ev help`
+
