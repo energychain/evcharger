@@ -1,0 +1,34 @@
+{
+  "name": "evcharger",
+  "version": "0.0.1",
+  "description": "Cost clearing and balancing in energy blockchain for KEBA based electric vehicle charging devices (Wallbox). Payment framework for distributed ledger in e-mobility scenarios.",
+  "main": "cli.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/energychain/evcharger.git"
+  },
+  "keywords": [
+    "stromdao",
+    "blockchain",
+    "emobility",
+    "keba",
+    "payment"
+  ],
+  "bin": {
+    "stromdao.ev": "./cli.js",    
+    "evcharger": "./cli.js"
+  },
+  "author": "Thorsten Zoerner <thorsten.zoerner@stromdao.de>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/energychain/evcharger/issues"
+  },
+  "homepage": "https://github.com/energychain/evcharger#readme",
+  "dependencies": {
+    "stromdao-businessobject": "^0.5.22",
+    "vorpal": "^1.12.0"
+  }
+}
