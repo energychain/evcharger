@@ -99,7 +99,12 @@ vorpal
   .command('stop <customerid>','Stop Charging Customer ID')  
   .option('-i <IP>','IP Address of KEBA KeContact UDP Protocol enabled Wallbox')    
   .action(function(args,callback) { vorpal.log("stop"); bo.stop(args,function() {  callback(); }) });    
-        	
+
+vorpal
+  .command('retrieve <customerid>','Retrieve Customer ID')  
+  .option('-i <IP>','IP Address of KEBA KeContact UDP Protocol enabled Wallbox')    
+  .action(function(args,callback) { vorpal.log("retrieve"); bo.retrieve(args,function() {  callback(); }) });          	
+  
 var interactive = vorpal.parse(process.argv, {use: 'minimist'})._ === undefined;
 
 if (interactive) {

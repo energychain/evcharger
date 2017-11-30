@@ -64,9 +64,9 @@ module.exports = {
 			var node = new StromDAOBO.Node({external_id:extid+"_input",testMode:true,rpc:global.rpcprovider});
 			node.mpr().then(function(mpo) {					
 				mpo.storeReading(reading.power.toString()).then(function(tx) {
-						vorpal.log("Updated Customer",extid,reading.power.toString());
-						vorpal.log("Tx",tx);
-						callback();
+					vorpal.log("Updated Customer",extid,reading.power.toString());
+					vorpal.log("Tx",tx);
+					callback();
 				});					
 			});					
 		});				
@@ -75,15 +75,37 @@ module.exports = {
 		bo.lastReading(args,function(reading) {
 			var extid=args.customerid;
 			var node = new StromDAOBO.Node({external_id:extid+"_input",testMode:true,rpc:global.rpcprovider});
+			var input = node.wallet.address;
+			var node = new StromDAOBO.Node({external_id:extid,testMode:true,rpc:global.rpcprovider});
 			node.mpr().then(function(mpo) {					
-				mpo.storeReading(reading.power.toString()).then(function(tx) {
-						vorpal.log("Updated Customer",extid,reading.power.toString());
-						vorpal.log("Tx",tx);
+				mpo.readings(input).then(function(tx) {
+					var delta = reading.power.toString()*1-tx.power.toString()*1;
+					if(delta>0) {
+						mpo.readings(node.wallet.address).then(function(rx) {
+								delta+=rx.power.toString()*1;
+								mpo.storeReading(delta).then(function(yx) {
+										vorpal.log("Tx",yx);
+										callback();
+								});								
+						});
+					} else {
+						vorpal.log("No Consumption");
 						callback();
+					}
 				});					
 			});					
 		});		
-	},		
+	},	
+	retrieve:function(args,callback) {		
+		var extid=args.customerid;			
+		var node = new StromDAOBO.Node({external_id:extid,testMode:true,rpc:global.rpcprovider});
+		node.mpr().then(function(mpo) {					
+			mpo.readings(node.wallet.address).then(function(tx) {
+				vorpal.log("Last Charge",new Date(tx.time.toString()*1000).toLocaleString());
+				vorpal.log("Total Energy",tx.power.toString());
+			});					
+		});							
+	},			
 };
 
 var bo = module.exports;
