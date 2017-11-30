@@ -13,7 +13,7 @@
 const vorpal = require('vorpal')();
 var com = require("./com.js");	
 var keba = require("./keba.js");	
-
+var bo = require("./dlt_bo.js");
 						
 vorpal
   .command('listen')  
@@ -62,24 +62,44 @@ vorpal
   .action(function(args,callback) { vorpal.log("SETENERGY ",args.num); keba.setenergy(args,function(responds) {  vorpal.log(responds); callback(); }) });		
 
 vorpal
-  .command('start','Start charging session for')  
+  .command('startEV','Start charging session for')  
   .option('-i <IP>','IP Address of KEBA KeContact UDP Protocol enabled Wallbox')
   .option('-a <address>','Address to charge on')
   .types({
     string: ['a']
   })
-  .action(function(args,callback) { vorpal.log("start"); keba.start(args,function(responds) {  vorpal.log(responds); callback(); }) });		
+  .action(function(args,callback) { vorpal.log("start"); keba.start_ev(args,function(responds) {  vorpal.log(responds); callback(); }) });		
     
 vorpal
-  .command('stop','Stop charging session for')  
+  .command('stopEV','Stop charging session for')  
   .option('-i <IP>','IP Address of KEBA KeContact UDP Protocol enabled Wallbox')
   .option('-a <address>','Address to charge on')
   .types({
     string: ['a']
   })
-  .action(function(args,callback) { vorpal.log("stop"); keba.stop(args,function(responds) {  vorpal.log(responds); callback(); }) });		
+  .action(function(args,callback) { vorpal.log("stop"); keba.stop_ev(args,function(responds) {  vorpal.log(responds); callback(); }) });		
               
-    	
+vorpal
+  .command('update','Update meter reading')  
+  .option('-i <IP>','IP Address of KEBA KeContact UDP Protocol enabled Wallbox')    
+  .action(function(args,callback) { vorpal.log("update"); bo.update(args,function() {  callback(); }) });
+
+vorpal
+  .command('lastReading','Get last commited Reading')  
+  .option('-i <IP>','IP Address of KEBA KeContact UDP Protocol enabled Wallbox')    
+  .action(function(args,callback) { vorpal.log("lastReading"); bo.lastReading(args,function() {  callback(); }) });  
+
+vorpal
+  .command('start <customerid>','Start Charging Customer ID')  
+  .option('-i <IP>','IP Address of KEBA KeContact UDP Protocol enabled Wallbox')    
+  .action(function(args,callback) { vorpal.log("start"); bo.start(args,function() {  callback(); }) });  
+  
+
+vorpal
+  .command('stop <customerid>','Stop Charging Customer ID')  
+  .option('-i <IP>','IP Address of KEBA KeContact UDP Protocol enabled Wallbox')    
+  .action(function(args,callback) { vorpal.log("stop"); bo.stop(args,function() {  callback(); }) });    
+        	
 var interactive = vorpal.parse(process.argv, {use: 'minimist'})._ === undefined;
 
 if (interactive) {

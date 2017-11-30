@@ -22,7 +22,8 @@ module.exports = {
 
 		server.on('message', function (message, remote) {						
 			if(typeof recv != "undefined") {
-				recv(message,remote);
+				server = dgram.createSocket('udp4');
+				recv(message,remote);				
 			} else {
 				vorpal.log(remote.address + ':' + remote.port +' - ' +message);	
 				callback();

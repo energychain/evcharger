@@ -55,7 +55,7 @@ module.exports = {
 				callback(""+message);
 		});	
 	},	
-	start:function(args,callback) {
+	start_ev:function(args,callback) {
 		var tag="e3f76b8d00000000";
 		var tag_class="01010400000000000000";		
 		if(typeof args.options.a != "undefined") {
@@ -68,7 +68,7 @@ module.exports = {
 				callback(""+message);
 		});	
 	},	
-	stop:function(args,callback) {
+	stop_ev:function(args,callback) {
 		var tag="e3f76b8d00000000";
 		var tag_class="01010400000000000000";
 		if(typeof args.options.a != "undefined") {
