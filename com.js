@@ -38,7 +38,17 @@ module.exports = {
 		let message = args.msg.join(' ');		
 		var device_port=7090;
 		var device_ip=null;
-		if(typeof args.options.i != "undefined") device_ip=args.options.i;
+		if(typeof args.options.i != "undefined") { 
+				device_ip=args.options.i; 			
+				if(typeof global.bo != "undefined") {
+					global.bo.storage().setItemSync("default_ip",device_ip);	
+				}
+			}else {
+				if(typeof global.bo != "undefined") {
+					device_ip=global.bo.storage().getItemSync("default_ip");	
+				}
+		}			
+		
 		
 		if(typeof recv=="undefined") {
 			recv = function(message,remote) {

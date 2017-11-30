@@ -11,6 +11,7 @@
 const vorpal = require('vorpal')();
 var com = require("./keba.js");	
 var StromDAOBO = require("stromdao-businessobject");   
+const vm = require('vm');
 
 module.exports = {
 	
@@ -105,7 +106,94 @@ module.exports = {
 				vorpal.log("Total Energy",tx.power.toString());
 			});					
 		});							
-	},			
+	},	
+	clearing:function(args,callback) {
+		var node = new StromDAOBO.Node({external_id:"stromdao-mp",rpc:global.rpcprovider,testMode:true})
+		global.blk_address=node.wallet.address;
+		node.roleLookup().then(function(rl) {
+		rl.relations(node.wallet.address,42).then(function(tx) {
+					if(tx=="0x0000000000000000000000000000000000000000") {
+						vorpal.log("ERROR: Consensus failed - no Meter Point Operation in place");
+						callback();
+					} else {
+						global.smart_contract_stromkonto=tx;
+						var extid=args.customerid;	
+						var report=args.reportid;				
+						args.num=report;
+						bo._ensureAllowedTx(extid).then(function(d) {				
+							com.report(args,function(rep) {
+									var node = new StromDAOBO.Node({external_id:extid,testMode:true,rpc:global.rpcprovider});						
+									global.settlement={};
+									global.node=node;
+									settlement.account=node.wallet.address;
+									var node = new StromDAOBO.Node({external_id:"stromdao-mp",testMode:true,rpc:global.rpcprovider});		
+									settlement.node_account=global.blk_address;  // Require Retrieve!
+									settlement.node_wallet=node.nodeWallet.address;
+									
+									settlement.base = Math.floor(rep["E pres"]/10);
+									
+									var to=settlement.node_account;
+									var from=settlement.account;
+									settlement.cost=0;
+									
+									if(typeof args.options.workprice != "undefined") {					
+										if(args.options.workprice<0)  { from=settlement.node_account; to=settlement.account; } 					
+										settlement.cost=Math.abs(Math.round(args.options.workprice*(settlement.base/1000)));
+									}
+									if(typeof args.options.sessionprice != "undefined") {					
+										settlement.cost+=args.options.sessionprice*1;
+									}
+									var settlement_js="global.promise = new Promise(function(resolve2,reject2) { node.stromkontoproxy(global.smart_contract_stromkonto).then(function(sko) { sko.addTx(settlement.from,settlement.to,settlement.cost,settlement.base).then(function(tx) {	console.log('AddTx',settlement.from,settlement.to,settlement.cost,settlement.base,tx); resolve2(tx);});});});";																						
+									
+									settlement.from=from;
+									settlement.to=to;
+									
+									var script = new vm.Script(settlement_js);
+									var result=script.runInThisContext();	
+									
+									if(typeof global.promise!="undefined") { 
+											global.promise.then(function(tx) {																								
+												callback();		
+											});
+									} else {											
+											callback();
+									}											
+							});
+						});
+					}
+			});
+		});
+	},		
+	_ensureAllowedTx:function(extid) {	
+		var p1 = new Promise(function(resolve, reject) {
+			var node = new StromDAOBO.Node({external_id:extid,testMode:true,rpc:global.rpcprovider});
+			var sender=node.wallet.address;
+			
+			var node = new StromDAOBO.Node({external_id:"stromdao-mp",testMode:true,rpc:global.rpcprovider});	  
+			var managed_meters= node.storage.getItemSync("managed_meters");
+			
+			if(managed_meters==null) managed_meters=[]; else managed_meters=JSON.parse(managed_meters);
+			
+			if(node.storage.getItemSync("managed_"+extid)==null) {
+					managed_meters.push(extid);
+					node.storage.setItemSync("managed_meters",JSON.stringify(managed_meters));	
+					node.storage.setItemSync("managed_"+extid,sender);	
+					node.stromkontoproxy().then(function(skop) {
+							skop.modifySender(sender,true).then(function(tx) {
+									vorpal.log("Mandated ",extid,tx);	
+									resolve("mandated");						
+							});
+					});			
+			} else {
+				resolve("mandated");	
+			}
+		});
+		return p1;
+	},
+	storage:function() {
+		var node = new StromDAOBO.Node({external_id:"stromdao-mp",testMode:true,rpc:global.rpcprovider});
+		return node.storage;
+	}
 };
 
 var bo = module.exports;

@@ -104,8 +104,19 @@ vorpal
   .command('retrieve <customerid>','Retrieve Customer ID')  
   .option('-i <IP>','IP Address of KEBA KeContact UDP Protocol enabled Wallbox')    
   .action(function(args,callback) { vorpal.log("retrieve"); bo.retrieve(args,function() {  callback(); }) });          	
+
+
+vorpal
+  .command('clearing <customerid> <reportid>','Clearing of report id (100-130) to customer')  
+  .option('-i <IP>','IP Address of KEBA KeContact UDP Protocol enabled Wallbox')    
+  .option('--workprice <num>','Workingprice per KWh')
+  .option('--sessionprice <num>','Workingprice per KWh')
+  .action(function(args,callback) { vorpal.log("clearing"); bo.clearing(args,function() {  callback(); }) });   
   
+    
 var interactive = vorpal.parse(process.argv, {use: 'minimist'})._ === undefined;
+
+global.bo=bo;
 
 if (interactive) {
 	vorpal
