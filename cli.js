@@ -11,6 +11,7 @@
  */
  
 const vorpal = require('vorpal')();
+
 var com = require("./com.js");	
 var keba = require("./keba.js");	
 var bo = require("./dlt_bo.js");
@@ -118,17 +119,4 @@ var interactive = vorpal.parse(process.argv, {use: 'minimist'})._ === undefined;
 
 global.bo=bo;
 
-if (interactive) {
-	vorpal
-		.delimiter('stromdao.ev $')
-		.show();
-} else {
-	// argv is mutated by the first call to parse.
-	process.argv.unshift('');
-	process.argv.unshift('');
-	vorpal.parent=this;
-	vorpal
-		.delimiter('')
-		.parse(process.argv);
-}
-	
+var cli = new require("stromdao-cli-helper")(vorpal);
